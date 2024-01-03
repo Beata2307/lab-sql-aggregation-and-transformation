@@ -30,7 +30,7 @@ limit 20;
 -- Hint: use a conditional expression.
 select *, 
 case
-	when weekday(rental_date) in (0,2,3,4) then 'workday'
+	when weekday(rental_date) in (0, 1, 2, 3, 4) then 'workday'
     else 'weekday'
 end as DAY_TYPE
 from sakila.rental
@@ -40,20 +40,35 @@ limit 20;
 -- If any rental duration value is NULL, replace it with the string 'Not Available'. Sort the results of the film title in ascending order.
 -- - Please note that even if there are currently no null values in the rental duration column, the query should still be written to handle such cases in the future.
 -- - Hint: Look for the IFNULL() function.
-select title, IFNULL(rental_duration, 'Not Available') as rental_duration from sakila.film; 
+
+select title, IFNULL(rental_duration, 'Not Available') as rental_duration 
+from sakila.film
+order by title asc; 
+
+/* Bonus: you need to retrieve the concatenated first and last names of customers, along with the first 3 characters 
+ of their email address, so that you can address them by their first name and use their email address to send personalized recommendations. 
+ The results should be ordered by last name in ascending order to make it easier to use the data.
+*/
+
+select concat(first_name, ' ', last_name, ' ', substring(email,1,3)) as customers
+from customer
+order by last_name asc;
 
 -- --------- CHALLENGE 2 ---------------------------------------------------------------------------------------------------------------------------------------------
 -- 1. Next, you need to analyze the films in the collection to gain some more insights. Using the film table, determine:
 -- 1.1 The total number of films that have been released.
+
 select * from sakila.film;
-select count(*) from sakila.film;
+select count(film_id) from sakila.film;
 
 -- 1.2 The number of films for each rating.
+
 select rating, count(*) as total_number_of_films from sakila.film
-group by rating;
+group by rating; 
 
 -- 1.3 The number of films for each rating, sorting the results in descending order of the number of films. 
 -- This will help you to better understand the popularity of different film ratings and adjust purchasing decisions accordingly.
+
 select rating, count(*) as total_number_of_films from sakila.film
 group by rating
 order by total_number_of_films desc;
@@ -61,7 +76,23 @@ order by total_number_of_films desc;
 -- 2. Using the film table, determine:
 -- 2.1 The mean film duration for each rating, and sort the results in descending order of the mean duration. Round off the average lengths to two decimal places. 
 -- This will help identify popular movie lengths for each category.
+
+select rating, round(avg(length), 2) as duration
+from film
+group by rating
+order by avg(length) desc;
+
 -- 2.2 Identify which ratings have a mean duration of over two hours in order to help select films for customers who prefer longer movies.
 
+select rating, round(avg(length), 2) as duration
+from film
+group by rating
+having avg(length) > 120;
 
+-- Bonus: determine which last names are not repeated in the table actor.
+
+select last_name
+from actor
+group by last_name
+having count(last_name) = 1;
 
